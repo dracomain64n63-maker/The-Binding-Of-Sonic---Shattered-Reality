@@ -1,5 +1,5 @@
 
-name: Build Sonic Shattered
+name: Build Sonic Shattered Unsigned IPA
 
 on:
   workflow_dispatch:
@@ -7,34 +7,137 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Godot
+      - name: Install Godot 4.7.2
         run: |
           brew install --cask godot
+          godot --version
 
-      - name: Check Godot version
-        run: godot --version
+      - name: Install matching iOS export templates
+        run: |
+          VERSION="4.7.2"
+          TEMPLATE_URL="https://github.com/godotengine/godot/releases/download/${VERSION}-stable/Godot_v${VERSION}-stable_export_templates.tpz"
 
-      - name: Import project
+          curl -fL "$TEMPLATE_URL" -o templates.tpz
+
+          TEMP_DIR="$RUNNER_TEMP/godot-templates"
+          DEST="$HOME/Library/Application Support/Godot/export_templates/${VERSION}.stable"
+
+          mkdir -p "$TEMP_DIR"
+          mkdir -p "$(dirname "$DEST")"
+
+          unzip -q templates.tpz -d "$TEMP_DIR"
+
+          if [ -d "$TEMP_DIR/templates" ]; then
+            mv "$TEMP_DIR/templates" "$DEST"
+          else
+            echo "Export templates folder was not found"
+            exit 1
+          fi
+
+      - name: Fix project file paths
+        run: |
+          sed -i '' 's#res://Scenes/Main.tscn#res://scenes/Main.tscn#g' project.godot
+          sed -i '' 's#res://Scripts/main.gd#res://scripts/main.gd#g' scenes/Main.tscn
+
+      - name: Create iOS export preset
+        run: |
+          cat > export_presets.cfg <<'EOF'
+          [preset.0]
+
+          name="iOS"
+          platform="iOS"
+          runnable=true
+          dedicated_server=false
+          custom_features=""
+          export_filter="all_resources"
+          include_filter=""
+          exclude_filter=""
+          export_path="build/ios"
+          patches=PackedStringArray()
+          encryption_include_filters=""
+          encryption_exclude_filters=""
+          seed=0
+          encrypt_pck=false
+          encrypt_directory=false
+          script_export_mode=2
+
+          [preset.0.options]
+
+          custom_template/debug=""
+          custom_template/release=""
+          architectures/arm64=true
+          application/app_store_team_id=""
+          application/bundle_identifier="com.squirtle.sonicshattered"
+          application/export_method_debug=0
+          application/export_method_release=0
+          application/export_project_only=true
+          application/min_ios_version="14.0"
+          EOF
+
+      - name: Import and validate Godot project
         run: |
           godot --headless --editor --path . --quit
 
-      - name: Export iOS project
+      - name: Export Xcode project
         run: |
           mkdir -p build
-          godot --headless --path . \
-            --export-release "iOS" build/SonicShattered.ipa
+          godot --headless --path . --export-release "iOS" build/ios
 
-      - name: Upload build
+      - name: Build unsigned iOS application
+        run: |
+          PROJECT=$(find build/ios -name "*.xcodeproj" -print -quit)
+
+          if [ -z "$PROJECT" ]; then
+            echo "Xcode project was not generated"
+            find build -maxdepth 4 -type f
+            exit 1
+          fi
+
+          SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["project"]["schemes"][0])')
+
+          xcodebuild \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build/derived \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PRODUCT_BUNDLE_IDENTIFIER=com.squirtle.sonicshattered \
+            build
+
+      - name: Package unsigned IPA
+        run: |
+          APP=$(find build/derived/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" -print -quit)
+
+          if [ -z "$APP" ]; then
+            echo "Compiled iOS app was not found"
+            exit 1
+          fi
+
+          mkdir -p build/package/Payload
+          cp -R "$APP" build/package/Payload/
+
+          cd build/package
+          zip -qry ../SonicShattered-unsigned.ipa Payload
+
+          test -s ../SonicShattered-unsigned.ipa
+
+      - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
         with:
-          name: Sonic-Shattered-iOS
-          path: build/
+          name: SonicShattered-unsigned-IPA
+          path: build/SonicShattered-unsigned.ipa
           if-no-files-found: error
