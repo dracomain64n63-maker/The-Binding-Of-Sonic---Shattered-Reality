@@ -1,20 +1,23 @@
 # Sonic: Shattered Reality
 
-A 2D top-down action-roguelike foundation made with Godot 4.7.2.
+A 2D top-down Sonic-inspired action-roguelike foundation made with Godot 4.7.2.
 
-## Run it
-1. Install Godot 4.7.2 (or a compatible Godot 4 release).
+## Run the project
+
+1. Install Godot 4.7.2 standard (not .NET).
 2. Extract this ZIP.
 3. Open the folder containing `project.godot` in Godot.
-4. Press **F6** to run the main scene, or **F5** to run the project.
+4. Press **F5** to run the project.
 
 ## Controls
+
 - Keyboard: WASD or arrow keys to move; Space or Enter to spin attack; Esc to pause.
-- Controller: any face button starts from the title screen; left stick / D-pad to move; South face button to attack; Start / Options or Esc to pause.
-- Touch: drag the lower-left virtual stick to move; tap/hold the lower-right button to spin.
-- Touch/controller switching: touch input shows touch controls; subsequent controller input hides them.
+- Controller: left stick / D-pad to move; South face button to attack; Start / Options or Esc to pause.
+- Touch: use the lower-left virtual stick and lower-right spin button.
+- Touch/controller switching: touch input reveals touch controls; subsequent controller input hides them. Disconnecting the controller reveals touch controls again.
 
 ## Included in this foundation
+
 - Title screen and start button
 - Top-down arena
 - Player movement
@@ -24,16 +27,31 @@ A 2D top-down action-roguelike foundation made with Godot 4.7.2.
 - Health, timer, pause, and game-over screens
 - Basic touch and controller input
 
-## Important limitations
-This is a playable gameplay foundation, not the complete planned game. It uses temporary code-drawn graphics and has no final Sonic artwork, music, story campaign, room generation, bosses, shops, or save system yet.
+This is a playable foundation, not the complete planned game. It currently uses code-drawn placeholder graphics and does not yet include the full campaign, procedural room generation, bosses, shops, final art, music, or save system.
 
-The project does not include an iOS export preset or a signed IPA. iOS export requires configuring an iOS export preset, installing matching Godot export templates, and using valid Apple signing credentials on a macOS runner. Do not add fake Team IDs or signing secrets.
+## iOS build with GitHub Actions
 
-## Folder layout
-- `Scenes/` - Godot scenes
-- `Scripts/` - gameplay scripts
-- `Assets/Sprites/` - future art assets
-- `Assets/Audio/` - future sound and music assets
+The workflow is `.github/workflows/build.yml`. It runs on GitHub's macOS runner, installs **Godot 4.7.2** and the matching export templates, exports the iOS Xcode project, builds the app with code signing disabled, and packages the app as `SonicShattered-unsigned.ipa`.
+
+1. Upload the contents of this project folder to the root of the GitHub repository, keeping `.github/workflows/build.yml` at that exact path.
+2. Commit and push to the `main` branch, or open **Actions → Build unsigned Sonic Shattered IPA → Run workflow**.
+3. When the workflow succeeds, open its run and download the `SonicShattered-unsigned-IPA` artifact.
+4. Sign that IPA with the signing app and certificate you already use.
+
+### Bundle identifier and Team ID placeholder
+
+- Bundle identifier: `com.squirtle.sonicshattered`
+- `application/app_store_team_id` is currently set to `SQUIRTLE00` only as a non-secret placeholder because Godot's iOS exporter requires a non-empty Team ID field even when exporting an Xcode project for an unsigned build. It is **not** a real Apple Team ID. Replace it with the actual Team ID before attempting an Apple-managed signing or App Store workflow. This workflow disables Xcode code signing and does not use a certificate or provisioning profile.
+
+### Important signing note
+
+The generated IPA is deliberately **unsigned**. It is packaged for later signing; it is not directly installable until a signing tool applies a valid signature and provisioning profile. The GitHub workflow never receives or stores the `.p12` certificate or its password.
+
+## Project layout
+
+- `assets/` - placeholder asset directories
+- `scenes/` - Godot scenes
+- `scripts/` - GDScript files
 - `project.godot` - project configuration
-
-All folder names are visible in the iPhone Files app; no hidden folders are included in this ZIP.
+- `export_presets.cfg` - iOS export settings
+- `.github/workflows/build.yml` - automated iOS build
