@@ -1,0 +1,40 @@
+
+name: Build Sonic Shattered
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Godot
+        run: |
+          brew install --cask godot
+
+      - name: Check Godot version
+        run: godot --version
+
+      - name: Import project
+        run: |
+          godot --headless --editor --path . --quit
+
+      - name: Export iOS project
+        run: |
+          mkdir -p build
+          godot --headless --path . \
+            --export-release "iOS" build/SonicShattered.ipa
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sonic-Shattered-iOS
+          path: build/
+          if-no-files-found: error
