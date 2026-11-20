@@ -1,66 +1,39 @@
 # Sonic: Shattered Reality
 
-A 2D, top-down, pixel-art roguelike project built with **Godot 4**. This repository currently contains the initial project foundation, a title screen, a placeholder gameplay scene, and the first pass of touchscreen/controller visibility switching.
+A 2D top-down action-roguelike foundation made with Godot 4.7.2.
 
-> This is an original fan-project starter. It does not include official Sonic assets, music, or other copyrighted game files.
+## Run it
+1. Install Godot 4.7.2 (or a compatible Godot 4 release).
+2. Extract this ZIP.
+3. Open the folder containing `project.godot` in Godot.
+4. Press **F6** to run the main scene, or **F5** to run the project.
 
-## Requirements
+## Controls
+- Keyboard: WASD or arrow keys to move; Space or Enter to spin attack; Esc to pause.
+- Controller: any face button starts from the title screen; left stick / D-pad to move; South face button to attack; Start / Options or Esc to pause.
+- Touch: drag the lower-left virtual stick to move; tap/hold the lower-right button to spin.
+- Touch/controller switching: touch input shows touch controls; subsequent controller input hides them.
 
-- Godot 4.3 or newer
-- For iOS export: a Mac with the required Apple development tools and Godot iOS export templates, plus valid signing credentials
-- For GitHub-based iOS builds: a configured macOS runner and signing setup; GitHub Actions does not remove Apple's signing requirements
+## Included in this foundation
+- Title screen and start button
+- Top-down arena
+- Player movement
+- Chasing enemies
+- Spin attack
+- Ring pickups
+- Health, timer, pause, and game-over screens
+- Basic touch and controller input
 
-## Open the project
+## Important limitations
+This is a playable gameplay foundation, not the complete planned game. It uses temporary code-drawn graphics and has no final Sonic artwork, music, story campaign, room generation, bosses, shops, or save system yet.
 
-1. Download and extract this folder.
-2. Open Godot Project Manager.
-3. Choose **Import** and select this folder's `project.godot` file.
-4. Open the project and press **F6** or **F5** to run it.
+The project does not include an iOS export preset or a signed IPA. iOS export requires configuring an iOS export preset, installing matching Godot export templates, and using valid Apple signing credentials on a macOS runner. Do not add fake Team IDs or signing secrets.
 
-## Current contents
+## Folder layout
+- `Scenes/` - Godot scenes
+- `Scripts/` - gameplay scripts
+- `Assets/Sprites/` - future art assets
+- `Assets/Audio/` - future sound and music assets
+- `project.godot` - project configuration
 
-```text
-sonic_shattered/
-├── project.godot
-├── README.md
-├── scenes/
-│   ├── main_menu.tscn
-│   └── game.tscn
-└── scripts/
-    ├── main_menu.gd
-    ├── game.gd
-    └── touch_controller_manager.gd
-```
-
-## Controls planned
-
-| Action | Keyboard | Controller | Touch |
-|---|---|---|---|
-| Move | WASD / arrow keys | Left stick / D-pad | Virtual movement area (visual placeholder in this starter) |
-| Attack | Space | South face button | Spin button (visual placeholder in this starter) |
-| Pause | Escape | Menu/Start-style button | To be added |
-
-Controller button mappings can differ between controller models and operating systems. The project's input actions will be tested and refined as gameplay is implemented.
-
-## Touch/controller visibility behavior
-
-- A controller connection hides the touchscreen overlay.
-- A touch press or drag brings the touchscreen overlay back.
-- The next actual controller button or stick input hides it again.
-- Disconnecting the last controller restores touchscreen controls.
-
-This first pass handles input-mode visibility. It does not yet implement a complete virtual joystick or gameplay movement system.
-
-## Development roadmap
-
-1. Project foundation, startup screen, and input-mode switching.
-2. Player movement, animation, room camera, and collision.
-3. Combat, enemies, projectiles, and damage feedback.
-4. Room/floor generation, pickups, ring currency, shops, and secrets.
-5. Bosses, playable characters, upgrades, areas, endings, and unlocks.
-6. Save data, settings, accessibility, audio, balancing, and full-device testing.
-7. iOS export workflow and release packaging.
-
-## Important status note
-
-This ZIP is **Milestone 1**, not the complete game. The full game scope is the target, but the remaining systems must be implemented and tested before this can be called a complete playable release. The startup screen uses original placeholder typography and colors; final pixel-art sprites, logo, sound, and animations are still to be created.
+All folder names are visible in the iPhone Files app; no hidden folders are included in this ZIP.
